@@ -67,14 +67,23 @@
          (file-type (asdf:file-type (make-instance component-type)))
          (sub-system-name-ends-in-slash ; Indicates directory.
            (eql #\/ (uiop:last-char sub-system-name)))
+         ;; Are we looking at a lisp file?
          (sub-system-file
            (uiop:file-exists-p
             (uiop:subpathname system-directory
                               sub-system-name
                               :type file-type)))
+         ;; Or a directory, in which case the heuristic below is
+         ;; applied.
          (sub-system-directory
            (uiop:directory-exists-p
             (uiop:subpathname system-directory sub-system-name))))
+
+    ;; FULL-SUB-SYSTEM-NAME: "some-library/foo/util"
+    ;; SUB-SYSTEM-NAME: "foo/util"
+    ;; SUB-SYSTEM-FILE: "/full/path/to/some-library/foo/util.lisp"
+    ;; SYSTEM-DIRECTORY: "/full/path/to/some-library/"
+    ;; FILE-TYPE: "lisp"
 
     ;; Heuristic to determine sub-system-file.
     ;; Simple case: "/my-lib/foo.lisp" was found.
@@ -99,19 +108,13 @@
                                 last-directory))
              ;; Update sub-system-file to reflect new location.
              (setf sub-system-file
-                   (uiop:subpathname
-                    system-directory
-                    relative-path
-                    :type file-type)))))
-
-    ;; FULL-SUB-SYSTEM-NAME: "some-library/foo/util"
-    ;; SUB-SYSTEM-NAME: "foo/util"
-    ;; SUB-SYSTEM-FILE: "/full/path/to/some-library/foo/util.lisp"
-    ;; SYSTEM-DIRECTORY: "/full/path/to/some-library/"
-    ;; FILE-TYPE: "lisp"
+                   (uiop:subpathname system-directory
+                                     relative-path
+                                     :type file-type)))))
 
     (when (uiop:file-exists-p sub-system-file)
       (let ((dependencies
+              ;; Canonicalize relative dependencies.
               (loop :for dep :in (read-dependencies primary-system
                                                     sub-system-file)
                     :collect
@@ -128,6 +131,7 @@
                                             "/")
                                         dep))
                           (symbol dep))))))
+
         (make-instance 'system-discovery
           :full-sub-system-name full-sub-system-name
           :sub-system-name sub-system-name
