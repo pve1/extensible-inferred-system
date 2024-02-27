@@ -6,11 +6,13 @@
            "DEPENDENCY-FORM-P"
            "READ-DEPENDENCIES"
            "EXTRACT-DEPENDENCIES"
+           "MAYBE-USE-EXISTING-SYSTEM"
+           "GENERATE-FRESH-SUB-SYSTEM"
+           "DISCOVER-SYSTEM"
            "INFER-SUB-SYSTEM"
 
            "REQUIRES"
-           "REQUIRES-SYSTEM"
-           "MAYBE-USE-EXISTING-SYSTEM"))
+           "REQUIRES-SYSTEM"))
 
 (in-package #:extensible-inferred-system)
 
