@@ -1,0 +1,74 @@
+
+* Extensible Inferred System
+
+This library aims to provide a starting point from which one can create ASDF system classes similar to package-inferred-system, i.e. systems that are implicitly inferred based on naming conventions, file layout or certain forms.
+
+** Requires-system
+
+Currently, a single system class, ~requires-system~, is provided for demonstration purposes. Instead of determining dependencies from defpackage or define-package forms like package-inferred-system, it looks for forms like ~(requires :alexandria "package" "util")~. Symbols indicate "normal" dependencies, while strings indicate "relative" dependencies whose names are computed based on the location of the current file. In addition, if a dependency signifies a directory, then it is assumed that the directory contains a lisp file with the same name as the directory. It's worth noting that this system does *not* care about packages like package-inferred-system does, it only cares about files. In other words, it does not require that the source files follow /one-package-per-file/ style.
+
+To illustrate, suppose we have a project with the following files:
+
+- my-lib.asd
+- package.lisp
+- utils.lisp
+- my-lib.lisp
+- module/
+  - module.lisp
+  - module-utils.lisp
+
+Then the contents of each file could look like this:
+
+- my-lib.asd
+
+#+begin_src lisp :results silent
+(asdf:defsystem #:my-lib
+  :defsystem-depends-on ("extensible-inferred-system")
+  :class "extensible-inferred-system:requires-system")
+#+end_src
+
+- package.lisp
+
+#+begin_src lisp :results silent
+(defpackage :my-lib ...)
+#+end_src
+
+- utils.lisp
+
+#+begin_src lisp :results silent
+(extensible-inferred-system:requires :alexandria "package")
+
+(in-package :my-lib)
+...
+#+end_src
+
+- my-lib.lisp
+
+#+begin_src lisp :results silent
+(extensible-inferred-system:requires :hunchentoot
+                                     :cl-who
+                                     "package"
+                                     "utils"
+                                     "module")
+(in-package :my-lib)
+...
+#+end_src
+
+- module/module.lisp
+
+#+begin_src lisp :results silent
+(extensible-inferred-system:requires :my-lib/package "module-utils")
+
+(in-package :my-lib)
+...
+#+end_src
+
+- module/module-utils.lisp
+
+#+begin_src lisp :results silent
+(extensible-inferred-system:requires :cl-ppcre)
+
+(defpackage :my-lib-module-utils (:use :cl))
+(in-package :my-lib-module-utils)
+...
+#+end_src
