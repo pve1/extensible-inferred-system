@@ -5,7 +5,7 @@
 ;;;;    (extensible-inferred-system:requires :alexandria "foo" "bar").
 ;;;;
 ;;;; The "requires" symbol is tested using string-equal, so
-;;;; my-lib:requires works too.
+;;;; "my-lib:requires" works too.
 
 (defmacro requires (&rest rest)
   (declare (ignore rest))
@@ -33,12 +33,18 @@
    (sub-system-name :initarg :sub-system-name
                     :accessor sub-system-name
                     :initform nil)
-   (relative-path :initarg :relative-path
-                  :accessor relative-path
-                  :initform nil)
+   (sub-system-file :initarg :sub-system-file
+                    :accessor sub-system-file
+                    :initform nil)
+   (sub-system-directory :initarg :sub-system-directory
+                         :accessor sub-system-directory
+                         :initform nil)
    (system-directory :initarg :system-directory
                      :accessor system-directory
                      :initform nil)
+   (relative-path :initarg :relative-path
+                  :accessor relative-path
+                  :initform nil)
    (dependencies :initarg :dependencies
                  :accessor dependencies
                  :initform nil)
@@ -47,13 +53,7 @@
                    :initform nil)
    (file-type :initarg :file-type
               :accessor file-type
-              :initform nil)
-   (sub-system-file :initarg :sub-system-file
-                    :accessor sub-system-file
-                    :initform nil)
-   (sub-system-directory :initarg :sub-system-directory
-                         :accessor sub-system-directory
-                         :initform nil)))
+              :initform nil)))
 
 (defmethod discover-system ((primary-system requires-system) full-sub-system-name)
   (let* ((sub-system-name (subseq full-sub-system-name
