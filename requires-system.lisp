@@ -7,12 +7,12 @@
 ;;;; The "requires" symbol is tested using string-equal, so
 ;;;; "my-lib:requires" works too.
 
+(defclass requires-system (system)
+  ())
+
 (defmacro requires (&rest rest)
   (declare (ignore rest))
   nil)
-
-(defclass requires-system (system)
-  ())
 
 (defmethod extract-dependencies ((primary-system requires-system)
                                  dependency-form
