@@ -36,9 +36,9 @@
    (sub-system-file :initarg :sub-system-file
                     :accessor sub-system-file
                     :initform nil)
-   (sub-system-directory :initarg :sub-system-directory
-                         :accessor sub-system-directory
-                         :initform nil)
+   (sub-system-relative-directory :initarg :sub-system-relative-directory
+                                  :accessor sub-system-relative-directory
+                                  :initform nil)
    (system-directory :initarg :system-directory
                      :accessor system-directory
                      :initform nil)
@@ -59,8 +59,15 @@
   (let* ((sub-system-name (subseq full-sub-system-name
                                   (1+ (length (asdf:component-name
                                                primary-system)))))
-         (relative-path sub-system-name) ; May change below.
          (system-directory (asdf:component-pathname primary-system))
+         (relative-path sub-system-name) ; May change below.
+         (sub-system-relative-directory
+           (if (position #\/ sub-system-name)
+               (subseq relative-path
+                       0
+                       (1+ (position #\/ relative-path
+                                     :from-end t)))
+               ""))
          (component-type (class-name
                           (asdf/defsystem:class-for-type primary-system
                                                          :file)))
@@ -75,14 +82,15 @@
                               :type file-type)))
          ;; Or a directory, in which case the heuristic below is
          ;; applied.
-         (sub-system-directory
+         (sub-system-directory-full-path
            (uiop:directory-exists-p
             (uiop:subpathname system-directory sub-system-name))))
 
+    ;; SYSTEM-DIRECTORY: "/full/path/to/some-library/"
     ;; FULL-SUB-SYSTEM-NAME: "some-library/foo/util"
     ;; SUB-SYSTEM-NAME: "foo/util"
+    ;; SUB-SYSTEM-RELATIVE-DIRECTORY: "foo/"
     ;; SUB-SYSTEM-FILE: "/full/path/to/some-library/foo/util.lisp"
-    ;; SYSTEM-DIRECTORY: "/full/path/to/some-library/"
     ;; FILE-TYPE: "lisp"
 
     ;; Heuristic to determine sub-system-file.
@@ -92,20 +100,29 @@
            t)
 
           ;; Sub-system is a directory. Expand like so:
-          ;; "/my-lib/foo/" -> "/my-lib/foo/foo.lisp"
+          ;; "/my-lib/foo/bar/" -> "/my-lib/foo/bar/bar.lisp"
           ((and (or (not sub-system-file)
                     sub-system-name-ends-in-slash)
-                sub-system-directory)
-           (let ((last-directory        ; the "foo" part
+                sub-system-directory-full-path)
+           (let ((last-directory        ; the "bar/" part
                    (car (last (pathname-directory
-                               sub-system-directory)))))
-             (setf relative-path        ; "foo" -> "foo/foo"
+                               sub-system-directory-full-path)))))
+             ;; For defsystem component specification.
+             (setf relative-path        ; "bar/" -> "bar/bar"
                    (concatenate 'string
                                 sub-system-name
                                 (if sub-system-name-ends-in-slash
                                     ""
                                     "/")
                                 last-directory))
+
+             ;; For canonicalization below.
+             (setf sub-system-relative-directory
+                   (concatenate 'string
+                                sub-system-relative-directory
+                                last-directory
+                                "/"))
+
              ;; Update sub-system-file to reflect new location.
              (setf sub-system-file
                    (uiop:subpathname system-directory
@@ -125,10 +142,7 @@
                                         (asdf:component-name
                                          primary-system)
                                         "/"
-                                        sub-system-name
-                                        (if sub-system-name-ends-in-slash
-                                            ""
-                                            "/")
+                                        sub-system-relative-directory
                                         dep))
                           (symbol dep))))))
 
@@ -139,7 +153,7 @@
           :dependencies dependencies
           :system-directory system-directory
           :sub-system-file sub-system-file
-          :sub-system-directory sub-system-directory
+          :sub-system-relative-directory sub-system-relative-directory
           :file-type file-type
           :component-type component-type)))))
 
