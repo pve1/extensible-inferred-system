@@ -10,9 +10,49 @@
 (defclass requires-system (system)
   ())
 
-(defmacro requires (&rest rest)
-  (declare (ignore rest))
-  nil)
+;;; Support loading lisp files.
+
+(defvar *asdf-active* nil)
+(defvar *anonymous-requires-system-class* 'requires-system)
+
+(defmethod asdf:operate :around (operation (system requires-system)
+                                 &key)
+  (let ((*asdf-active* t))
+    (call-next-method)))
+
+(defun ensure-anonymous-requires-system (file)
+  (eval `(asdf:defsystem "extensible-inferred-system-anonymous-requires-system"
+           :class ,(string-downcase
+                    (with-standard-io-syntax
+                      (prin1-to-string *anonymous-requires-system-class*)))
+           :pathname ,(directory-namestring file)
+           :source-file
+           ,(merge-pathnames
+             (make-pathname :name "extensible-inferred-system-anonymous-requires-system"
+                            :type "asd")
+             file))))
+
+(defun load-anonymous-requires-system-dependencies (file)
+  (let* ((system (ensure-anonymous-requires-system file))
+         (sub-system-name (concatenate 'string
+                                       (asdf:component-name system)
+                                       "/"
+                                       (pathname-name file))))
+    (asdf:operate 'asdf:prepare-op sub-system-name)))
+
+;; Idea: Autoload dependencies when loading a lisp file. REQUIRES is
+;; defined here, but see below for definition of
+;; LOAD-ANONYMOUS-REQUIRES-SYSTEM-DEPENDENCIES.
+(defmacro requires (&rest dependencies)
+  (declare (ignore dependencies))
+  (if *asdf-active*
+      nil
+      `(eval-when (:execute) ; Only scripts
+         (unless *asdf-active*
+           (load-anonymous-requires-system-dependencies
+            *load-truename*)))))
+
+;;; Dealing with dependencies.
 
 (defmethod extract-dependencies ((primary-system requires-system)
                                  dependency-form
@@ -25,6 +65,8 @@
        (setf car (car form))
        (symbolp car)
        (string-equal car "REQUIRES")))
+
+;;; Discovering potential systems.
 
 (defclass system-discovery ()
   ((full-sub-system-name :initarg :full-sub-system-name
@@ -54,6 +96,9 @@
    (file-type :initarg :file-type
               :accessor file-type
               :initform nil)))
+
+;;; This method returns an instance of SYSTEM-DISCOVERY. It is used to
+;;; either find an existing requires-system or to generate a fresh one.
 
 (defmethod discover-system ((primary-system requires-system) full-sub-system-name)
   (let* ((sub-system-name (subseq full-sub-system-name
@@ -157,28 +202,43 @@
           :file-type file-type
           :component-type component-type)))))
 
+;;;; If a suitable system has already been defined, use that.
+
+(defvar *debug* nil)
+
+(defmacro ? (form)
+  (if *debug*
+      `(progn (print ',form)
+              (print ,form))
+      form))
+
 (defmethod maybe-use-existing-system ((existing-system requires-system)
                                       (discovery system-discovery))
+  (let ((existing-sub-system (asdf:registered-system
+                              (full-sub-system-name discovery))))
     ;; Should we check around-compile-hook?
-    (and (eq (type-of existing-system) 'requires-system)
-         (equal (asdf:component-name existing-system)
-                (full-sub-system-name discovery))
-         (uiop:pathname-equal
-          (system-directory discovery)
-          (asdf:component-pathname existing-system))
-         (equal (dependencies discovery)
-                (asdf:component-sideway-dependencies
-                 existing-system))
+    (and (? existing-sub-system)
+         (? (eq (type-of existing-sub-system) 'requires-system))
+         (? (equal (asdf:component-name existing-sub-system)
+                       (full-sub-system-name discovery)))
+         (? (uiop:pathname-equal
+             (system-directory discovery)
+             (asdf:component-pathname existing-system)))
+         (? (equal (dependencies discovery)
+                       (asdf:component-sideway-dependencies
+                        existing-sub-system)))
          ;; Single child of type cl-source-file?
          (let (children child)
-           (and (setf children (asdf:component-children existing-system))
-                (setf child (first children))
-                (null (cdr children))
-                (eq (type-of child) 'asdf:cl-source-file)
-                (uiop:pathname-equal (sub-system-file discovery)
-                                     (asdf:component-pathname
-                                      child))))
-         existing-system))
+           (and (? (setf children (asdf:component-children existing-sub-system)))
+                (? (setf child (first children)))
+                (? (null (cdr children)))
+                (? (eq (type-of child) 'asdf:cl-source-file))
+                (? (uiop:pathname-equal (sub-system-file discovery)
+                                            (asdf:component-pathname
+                                             child)))))
+         existing-sub-system)))
+
+;;;; Otherwise generate a fresh system.
 
 (defmethod generate-fresh-sub-system ((primary-system requires-system) discovery)
   (eval
@@ -192,3 +252,4 @@
       :components ((,(component-type discovery)
                     ,(file-type discovery)
                     :pathname ,(relative-path discovery))))))
+
