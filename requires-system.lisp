@@ -201,38 +201,30 @@
 
 ;;;; If a suitable system has already been defined, use that.
 
-(defvar *debug* nil)
-
-(defmacro ? (form)
-  (if *debug*
-      `(progn (print ',form)
-              (print ,form))
-      form))
-
 (defmethod maybe-use-existing-system ((existing-system requires-system)
                                       (discovery system-discovery))
   (let ((existing-sub-system (asdf:registered-system
                               (full-sub-system-name discovery))))
     ;; Should we check around-compile-hook?
-    (and (? existing-sub-system)
-         (? (eq (type-of existing-sub-system) 'requires-system))
-         (? (equal (asdf:component-name existing-sub-system)
-                       (full-sub-system-name discovery)))
-         (? (uiop:pathname-equal
-             (system-directory discovery)
-             (asdf:component-pathname existing-system)))
-         (? (equal (dependencies discovery)
-                       (asdf:component-sideway-dependencies
-                        existing-sub-system)))
+    (and existing-sub-system
+         (eq (type-of existing-sub-system) 'requires-system)
+         (equal (asdf:component-name existing-sub-system)
+                (full-sub-system-name discovery))
+         (uiop:pathname-equal
+          (system-directory discovery)
+          (asdf:component-pathname existing-system))
+         (equal (dependencies discovery)
+                (asdf:component-sideway-dependencies
+                 existing-sub-system))
          ;; Single child of type cl-source-file?
          (let (children child)
-           (and (? (setf children (asdf:component-children existing-sub-system)))
-                (? (setf child (first children)))
-                (? (null (cdr children)))
-                (? (eq (type-of child) 'asdf:cl-source-file))
-                (? (uiop:pathname-equal (sub-system-file discovery)
-                                            (asdf:component-pathname
-                                             child)))))
+           (and (setf children (asdf:component-children existing-sub-system))
+                (setf child (first children))
+                (null (cdr children))
+                (eq (type-of child) 'asdf:cl-source-file)
+                (uiop:pathname-equal (sub-system-file discovery)
+                                     (asdf:component-pathname
+                                      child))))
          existing-sub-system)))
 
 ;;;; Otherwise generate a fresh system.
