@@ -43,6 +43,7 @@
 ;; Idea: Autoload dependencies when loading a lisp file. REQUIRES is
 ;; defined here, but see below for definition of
 ;; LOAD-ANONYMOUS-REQUIRES-SYSTEM-DEPENDENCIES.
+
 (defmacro requires (&rest dependencies)
   (declare (ignore dependencies))
   (if *asdf-active*
@@ -143,7 +144,6 @@
     (cond ((and (not sub-system-name-ends-in-slash)
                 sub-system-file)
            t)
-
           ;; Sub-system is a directory. Expand like so:
           ;; "/my-lib/foo/bar/" -> "/my-lib/foo/bar/bar.lisp"
           ((and (or (not sub-system-file)
@@ -160,20 +160,18 @@
                                     ""
                                     "/")
                                 last-directory))
-
              ;; For canonicalization below.
              (setf sub-system-relative-directory
                    (concatenate 'string
                                 sub-system-relative-directory
                                 last-directory
                                 "/"))
-
              ;; Update sub-system-file to reflect new location.
              (setf sub-system-file
                    (uiop:subpathname system-directory
                                      relative-path
                                      :type file-type)))))
-
+    ;; Finally create the instance if a source file was found.
     (when (uiop:file-exists-p sub-system-file)
       (let ((dependencies
               ;; Canonicalize relative dependencies.
@@ -190,7 +188,6 @@
                                         sub-system-relative-directory
                                         dep))
                           (symbol dep))))))
-
         (make-instance 'system-discovery
           :full-sub-system-name full-sub-system-name
           :sub-system-name sub-system-name
