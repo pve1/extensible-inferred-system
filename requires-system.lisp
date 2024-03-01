@@ -102,8 +102,9 @@
               :accessor file-type
               :initform nil)))
 
-;;; This method returns an instance of SYSTEM-DISCOVERY. It is used to
-;;; either find an existing requires-system or to generate a fresh one.
+;;; This method returns an instance of SYSTEM-DISCOVERY. The instance
+;;; is used to either find an existing requires-system or to generate
+;;; a fresh one.
 
 (defmethod discover-system ((primary-system requires-system) full-sub-system-name)
   (let* ((sub-system-name (subseq full-sub-system-name
