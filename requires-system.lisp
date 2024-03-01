@@ -20,6 +20,10 @@
   (let ((*asdf-active* t))
     (call-next-method)))
 
+(defmethod asdf:perform :around (operation (system requires-system))
+  (let ((*asdf-active* t))
+    (call-next-method)))
+
 (defun ensure-anonymous-requires-system (file)
   (eval `(asdf:defsystem "extensible-inferred-system-anonymous-requires-system"
            :class ,(string-downcase
