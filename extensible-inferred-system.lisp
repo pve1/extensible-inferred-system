@@ -69,10 +69,10 @@ system instance that corresponds to that name if a suitable source
 file can be found. Returns NIL otherwise."))
 
 (defun sysdef-system-search (system-name)
-  ;; If system-name is "my-library/foo", then the primary name is
+  ;; If SYSTEM-NAME is "my-library/foo", then the primary name is
   ;; "my-library".
   (let ((primary-name (asdf:primary-system-name system-name)))
-    ;; Don't do anything if system-name wasn't of the form
+    ;; Don't do anything if SYSTEM-NAME wasn't of the form
     ;; "my-library/foo", i.e. not a primary name.
     (unless (equal primary-name system-name)
       ;; Default method returns NIL.
