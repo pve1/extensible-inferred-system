@@ -17,14 +17,20 @@
 (in-package #:extensible-inferred-system)
 
 (defclass system (asdf:system)
-  ())
+  ()
+  (:documentation "The base system class. Provides default behaviour for
+INFER-SUB-SYSTEM and READ-DEPENDENCIES."))
+
+;;; Dependency handling.
 
 (defgeneric dependency-form-p (primary-system form)
   (:documentation "Returns non-nil if FORM specifies dependencies in the context of
-PRIMARY-SYSTEM."))
+PRIMARY-SYSTEM. Is used by READ-DEPENDENCIES to determine when to call
+EXTRACT-DEPENDENCIES."))
 
 (defgeneric extract-dependencies (primary-system dependency-form &key pathname)
-  (:documentation "Returns dependencies specified by DEPENDENCY-FORM."))
+  (:documentation "Returns dependencies specified by DEPENDENCY-FORM. Is called by
+READ-DEPENDENCIES when a dependency-form is found."))
 
 (defgeneric read-dependencies (primary-system file)
   (:method ((primary-system system) file)
@@ -35,6 +41,8 @@ PRIMARY-SYSTEM."))
       (extract-dependencies primary-system form :pathname file)))
   (:documentation "Searches FILE for a form satisfying DEPENDENCY-FORM-P. Returns
 dependencies specified by the first form found."))
+
+;;; Inferring systems.
 
 (defgeneric discover-system (primary-system full-sub-system-name)
   (:documentation "Returns information about the sub-system FULL-SUB-SYSTEM-NAME or NIL
