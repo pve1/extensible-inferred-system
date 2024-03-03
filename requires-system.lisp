@@ -212,7 +212,8 @@
                               (full-sub-system-name discovery))))
     ;; Should we check around-compile-hook?
     (and existing-sub-system
-         (eq (type-of existing-sub-system) 'requires-system)
+         (eq (type-of existing-sub-system)
+             (type-of existing-system))
          (equal (asdf:component-name existing-sub-system)
                 (full-sub-system-name discovery))
          (uiop:pathname-equal
