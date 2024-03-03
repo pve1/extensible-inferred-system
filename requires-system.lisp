@@ -210,20 +210,27 @@
                               (full-sub-system-name discovery))))
     ;; Should we check around-compile-hook?
     (and existing-sub-system
+         ;; Same type?
          (eq (type-of existing-sub-system)
              (type-of existing-system))
+         ;; Same name?
          (equal (asdf:component-name existing-sub-system)
                 (full-sub-system-name discovery))
+         ;; Same directory?
          (uiop:pathname-equal
           (system-directory discovery)
           (asdf:component-pathname existing-system))
-         (equal (dependencies discovery)
-                (asdf:component-sideway-dependencies
-                 existing-sub-system))
+         ;; Same dependencies? (Could EQUAL be used here instead?)
+         (let ((dep-a (dependencies discovery))
+               (dep-b (asdf:component-sideway-dependencies
+                       existing-sub-system)))
+           (and (subsetp dep-a dep-b :test #'equal)
+                (subsetp dep-b dep-a :test #'equal)))
          ;; Single child of type cl-source-file?
-         (let (children child)
-           (and (setf children (asdf:component-children existing-sub-system))
-                (setf child (first children))
+         (let* ((children (asdf:component-children existing-sub-system))
+                (child (first children)))
+           (and children
+                child
                 (null (cdr children))
                 (eq (type-of child) 'asdf:cl-source-file)
                 (uiop:pathname-equal (sub-system-file discovery)
