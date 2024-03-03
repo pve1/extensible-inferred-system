@@ -119,9 +119,7 @@
                        (1+ (position #\/ relative-path
                                      :from-end t)))
                ""))
-         (component-type (class-name
-                          (asdf/defsystem:class-for-type primary-system
-                                                         :file)))
+         (component-type 'asdf:cl-source-file)
          (file-type (asdf:file-type (make-instance component-type)))
          (sub-system-name-ends-in-slash ; Indicates directory.
            (eql #\/ (uiop:last-char sub-system-name)))
