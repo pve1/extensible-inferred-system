@@ -44,8 +44,8 @@
                                        (pathname-name file))))
     (asdf:operate 'asdf:prepare-op sub-system-name)))
 
-;; Idea: Autoload dependencies when loading a lisp file. REQUIRES is
-;; defined here, but see below for definition of
+;; Autoload dependencies when loading a lisp file. REQUIRES is defined
+;; here, but see below for definition of
 ;; LOAD-ANONYMOUS-REQUIRES-SYSTEM-DEPENDENCIES.
 
 (defmacro requires (&rest dependencies)
