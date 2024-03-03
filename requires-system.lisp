@@ -202,7 +202,7 @@
           :file-type file-type
           :component-type component-type)))))
 
-;;;; If a suitable system has already been defined, use that.
+;;; If a suitable system has already been defined, use that.
 
 (defmethod maybe-use-existing-system ((existing-system requires-system)
                                       (discovery system-discovery))
@@ -231,7 +231,7 @@
                                       child))))
          existing-sub-system)))
 
-;;;; Otherwise generate a fresh system.
+;;; Otherwise generate a fresh system.
 
 (defmethod generate-fresh-sub-system ((primary-system requires-system) discovery)
   (eval
