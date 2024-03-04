@@ -204,6 +204,10 @@
 
 ;;; If a suitable system has already been defined, use that.
 
+(defun set-equal-p (set-1 set-2)
+  (and (subsetp set-1 set-2 :test #'equal)
+       (subsetp set-2 set-1 :test #'equal)))
+
 (defmethod maybe-use-existing-system ((existing-system requires-system)
                                       (discovery system-discovery))
   (let ((existing-sub-system (asdf:registered-system
@@ -221,16 +225,16 @@
           (system-directory discovery)
           (asdf:component-pathname existing-system))
          ;; Same dependencies? (Could EQUAL be used here instead?)
-         (let ((dep-a (dependencies discovery))
-               (dep-b (asdf:component-sideway-dependencies
-                       existing-sub-system)))
-           (and (subsetp dep-a dep-b :test #'equal)
-                (subsetp dep-b dep-a :test #'equal)))
+         (set-equal-p (dependencies discovery)
+                      (asdf:component-sideway-dependencies
+                       existing-sub-system))
+         ;; Same packages?
+         (set-equal-p (required-packages discovery)
+                      (required-packages existing-sub-system))
          ;; Single child of type cl-source-file?
          (let* ((children (asdf:component-children existing-sub-system))
                 (child (first children)))
-           (and children
-                child
+           (and child
                 (null (cdr children))
                 (eq (type-of child) 'asdf:cl-source-file)
                 (uiop:pathname-equal (sub-system-file discovery)
