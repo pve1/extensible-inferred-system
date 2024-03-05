@@ -8,7 +8,9 @@
 ;;;; "my-lib:requires" works too.
 
 (defclass requires-system (system)
-  ())
+  ((required-packages :initarg :required-packages
+                      :accessor required-packages
+                      :initform nil)))
 
 ;;; Support loading lisp files.
 
@@ -100,7 +102,10 @@
                    :initform nil)
    (file-type :initarg :file-type
               :accessor file-type
-              :initform nil)))
+              :initform nil)
+   (required-packages :initarg :required-packages
+                      :accessor required-packages
+                      :initform nil)))
 
 ;;; This method returns an instance of SYSTEM-DISCOVERY. The instance
 ;;; is used to either find an existing requires-system or to generate
@@ -176,31 +181,64 @@
                                      :type file-type)))))
     ;; Finally create the instance if a source file was found.
     (when (uiop:file-exists-p sub-system-file)
-      (let ((dependencies
-              ;; Canonicalize relative dependencies.
-              (loop :for dep :in (read-dependencies primary-system
-                                                    sub-system-file)
-                    :collect
-                       (asdf:coerce-name
-                        (etypecase dep
-                          (string
+      (let* ((dependencies-from-file
+               (read-dependencies primary-system
+                                  sub-system-file))
+             dependencies
+             required-packages)
+        ;; Canonicalize relative dependencies and collect
+        ;; required packages.
+        (loop :for clause
+              :in dependencies-from-file
+              :do (cond ((symbolp clause)
+                         (push (asdf:coerce-name clause)
+                               dependencies))
+                        ((stringp clause)
+                         (push
+                          (asdf:coerce-name
                            (concatenate 'string
                                         (asdf:component-name
                                          primary-system)
                                         "/"
                                         sub-system-relative-directory
-                                        dep))
-                          (symbol dep))))))
+                                        clause))
+                          dependencies))
+                        ((and (listp clause)
+                              (member (car clause)
+                                      '(:package :packages)))
+                         (dolist (p (rest clause))
+                           (push (string p)
+                                 required-packages)))))
+        (setf dependencies (reverse dependencies)
+              required-packages (reverse required-packages))
         (make-instance 'system-discovery
           :full-sub-system-name full-sub-system-name
           :sub-system-name sub-system-name
           :relative-path relative-path
           :dependencies dependencies
+          :required-packages required-packages
           :system-directory system-directory
           :sub-system-file sub-system-file
           :sub-system-relative-directory sub-system-relative-directory
           :file-type file-type
           :component-type component-type)))))
+
+(defclass ensure-package-op (asdf:selfward-operation)
+  ((asdf:selfward-operation :initform '() :allocation :class)))
+
+(defmethod asdf:perform ((op ensure-package-op) (system requires-system))
+  (dolist (p (required-packages system))
+    (unless (find-package p)
+      (format t "Creating package ~A." p)
+      (make-package p :use '(:cl)))))
+
+;;; I guess we shouldn't use prepare-op here, but it makes loading
+;;; scripts work conveniently, since REQUIRE does PREPARE-OP.
+
+(defmethod asdf:component-depends-on ((op asdf:prepare-op)
+                                      (system requires-system))
+  (cons (list 'ensure-package-op system)
+        (call-next-method)))
 
 ;;; If a suitable system has already been defined, use that.
 
@@ -255,5 +293,6 @@
       ;; :around-compile ,around-compile
       :components ((,(component-type discovery)
                     ,(file-type discovery)
-                    :pathname ,(relative-path discovery))))))
+                    :pathname ,(relative-path discovery)))
+      :required-packages ,(required-packages discovery))))
 
