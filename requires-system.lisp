@@ -228,9 +228,6 @@
          (set-equal-p (dependencies discovery)
                       (asdf:component-sideway-dependencies
                        existing-sub-system))
-         ;; Same packages?
-         (set-equal-p (required-packages discovery)
-                      (required-packages existing-sub-system))
          ;; Single child of type cl-source-file?
          (let* ((children (asdf:component-children existing-sub-system))
                 (child (first children)))
