@@ -15,8 +15,22 @@
   ())
 
 (defmethod read-dependencies :around ((system feature-system) file)
-  (let ((*features* (cons :requires *features*)))
-    (call-next-method)))
+  (let* ((*features* (cons :requires *features*))
+         (first-line (uiop:with-input-file (stream file)
+                       (loop :for c = (read-char stream nil nil)
+                             :while c
+                             :do (unless (member c '(#\space #\newline #\tab))
+                                   (unread-char c stream)
+                                   (loop-finish)))
+                       (read-line stream nil "")))
+         (requires "#+requires")
+         (mismatch (mismatch requires
+                             first-line
+                             :test #'char-equal)))
+    (when (or (null mismatch)
+              (= (length requires)
+                 mismatch))
+      (call-next-method))))
 
 (defmethod extract-dependencies ((primary-system feature-system)
                                  dependency-form
