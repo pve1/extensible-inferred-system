@@ -53,7 +53,7 @@
                                            (zerop (length line)))
                                       (and (not (zerop (length line)))
                                            (eql #\; (aref line 0))))
-                           ;; Skip initial empty lines if system
+                           ;; Skip initial empty lines if the system
                            ;; allows.
                            :do (when scanning-for-comment
                                  (cond ((equal "" line)
@@ -64,7 +64,7 @@
                                                 :test #'char-equal)
                                        ;; Found something interesting.
                                        (setf scanning-for-comment nil))
-                                       ;; Found something not interesting.
+                                       ;; Found something uninteresting.
                                        (t (loop-finish))))
                                (unless scanning-for-comment
                                  (map nil (lambda (x)
