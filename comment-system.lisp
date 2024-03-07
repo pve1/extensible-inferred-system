@@ -26,6 +26,8 @@
                          :accessor requires-symbol-name
                          :initform "REQUIRES")))
 
+(defgeneric requires-symbol (system))
+
 (defmethod requires-symbol ((system comment-system))
   (intern (requires-symbol-name system)
           :extensible-inferred-system-temporary))
