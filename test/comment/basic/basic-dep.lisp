@@ -1,3 +1,3 @@
-(quote (:alexandria))
+;;;; Requires alexandria
 
 (print 'basic-dep)

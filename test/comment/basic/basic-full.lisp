@@ -1,3 +1,3 @@
-;;;; requires #:extensible-inferred-system-quote-test/basic/basic-dep
+;;;; Requires extensible-inferred-system-comment-test/basic/basic-dep
 
 (print 'basic-full)

@@ -1,3 +1,3 @@
-;; requires extensible-inferred-system-quote-test/basic
+;; Requires extensible-inferred-system-comment-test/basic
 
 (print 'full)
