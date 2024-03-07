@@ -77,7 +77,7 @@ Then the contents of each file could look like this:
 
 ** Comment-system
 
-This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is "requires dep1 dep2 ..." and it may span multiple lines. A non-comment line ends the dependency specification.
+This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is ~requires dep1 dep2 ...~ and it may span multiple lines. A non-comment line ends the dependency specification.
 
 Example:
 
@@ -90,7 +90,6 @@ Example:
 ;;;;   "macros"
 ;;;;   "util/logging"
 ;;;;   "util/strings"
-
 
 (in-package :my-app)
 ...
@@ -116,7 +115,7 @@ Example:
 
 ** Feature-system
 
-This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with the reader conditional expression #+requires (...) at the beginning of a file.
+This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with the reader conditional expression #+requires (...) at the beginning of a file. It is assumed that no such feature is normally present. In order to recognize if no dependencies have been specified, the system will search for the string "#+requires" (case-insensitive) at the beginning of the file before attempting to extract dependencies.
 
 Example:
 
