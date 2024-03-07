@@ -9,7 +9,13 @@ Currently a few systems are provided for demonstration purposes. They are descri
 
 The system ~requires-system~ (a subclass of ~asdf:system~) works a bit like package-inferred-system, except that instead of determining dependencies from ~defpackage~ or ~define-package~ forms like package-inferred-system, it looks for forms like ~(requires :alexandria "package" "util")~. Symbols indicate "normal" dependencies, while strings indicate "relative" dependencies whose names are computed based on the location of the current file. In addition, if a dependency signifies a directory, then it is assumed that the directory contains a lisp file with the same name as the directory. It's worth noting that this system does *not* care about packages like package-inferred-system does, it only cares about files. In other words, it does not require that the source files follow /one-package-per-file/ style.
 
-To illustrate, suppose we have a project with the following files:
+A ~requires-system~ (file or directory) may be loaded normally with ASDF:
+
+#+begin_src lisp :results silent
+(asdf:load-system "my-app/start-server")
+#+end_src
+
+To illustrate how it works, suppose we have a project with the following files:
 
 - my-lib.asd
 - package.lisp
