@@ -12,7 +12,10 @@
            "INFER-SUB-SYSTEM"
 
            "REQUIRES"
-           "REQUIRES-SYSTEM"))
+           "REQUIRES-SYSTEM"
+           "QUOTE-SYSTEM"
+           "FEATURE-SYSTEM"
+           "COMMENT-SYSTEM"))
 
 (in-package #:extensible-inferred-system)
 

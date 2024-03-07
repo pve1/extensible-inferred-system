@@ -5,7 +5,10 @@
   :version "0.0.1"
   :serial t
   :components ((:file "extensible-inferred-system")
-               (:file "requires-system"))
+               (:file "requires-system")
+               (:file "quote-system")
+               (:file "feature-system")
+               (:file "comment-system"))
   :depends-on ())
 
 

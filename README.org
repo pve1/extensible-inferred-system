@@ -3,11 +3,19 @@
 
 This library aims to provide a starting point from which one can create ASDF system classes similar to package-inferred-system, i.e. systems that are implicitly inferred based on naming conventions, file layout or certain forms.
 
+Currently a few systems are provided for demonstration purposes. They are described below.
+
 ** Requires-system
 
-Currently, a single system class, ~requires-system~, is provided for demonstration purposes. Instead of determining dependencies from ~defpackage~ or ~define-package~ forms like package-inferred-system, it looks for forms like ~(requires :alexandria "package" "util")~. Symbols indicate "normal" dependencies, while strings indicate "relative" dependencies whose names are computed based on the location of the current file. In addition, if a dependency signifies a directory, then it is assumed that the directory contains a lisp file with the same name as the directory. It's worth noting that this system does *not* care about packages like package-inferred-system does, it only cares about files. In other words, it does not require that the source files follow /one-package-per-file/ style.
+The system ~requires-system~ (a subclass of ~asdf:system~) works a bit like package-inferred-system, except that instead of determining dependencies from ~defpackage~ or ~define-package~ forms like package-inferred-system, it looks for forms like ~(requires :alexandria "package" "util")~. Symbols indicate "normal" dependencies, while strings indicate "relative" dependencies whose names are computed based on the location of the current file. In addition, if a dependency signifies a directory, then it is assumed that the directory contains a lisp file with the same name as the directory. It's worth noting that this system does *not* care about packages like package-inferred-system does, it only cares about files. In other words, it does not require that the source files follow /one-package-per-file/ style.
 
-To illustrate, suppose we have a project with the following files:
+A ~requires-system~ (file or directory) may be loaded normally with ASDF. For example, if we have a lisp file called ~start-server.lisp~ or a directory called ~start-server~ in the same directory as the system definition file ~my-app.asd~, then it can be loaded (along with its dependencies) by calling:
+
+#+begin_src lisp :results silent
+(asdf:load-system "my-app/start-server")
+#+end_src
+
+To better illustrate how it works, suppose we have a project with the following files:
 
 - my-lib.asd
 - package.lisp
@@ -70,5 +78,61 @@ Then the contents of each file could look like this:
 
 (defpackage :my-lib-module-utils (:use :cl))
 (in-package :my-lib-module-utils)
+...
+#+end_src
+
+** Comment-system
+
+This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is ~requires dep1 dep2 ...~ and it may be a single line, or it may span multiple lines. A non-comment line ends the dependency specification.
+
+Example:
+
+#+begin_src lisp :results silent
+;;;; Requires
+;;;;
+;;;;   alexandria
+;;;;   cl-ppcre
+;;;;   my-app/some/module
+;;;;   "package"
+;;;;   "util/logging"
+;;;;   "util/strings"
+
+(in-package :my-app)
+...
+#+end_src
+
+** Quote-system
+
+This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with a ~quote~ form at the beginning of a file.
+
+Example:
+
+#+begin_src lisp :results silent
+(quote (:alexandria
+        :cl-ppcre
+        :my-app/some/module
+        "package"
+        "util/logging"
+        "util/strings"))
+
+(in-package :my-app)
+...
+#+end_src
+
+** Feature-system
+
+This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with the reader conditional expression ~#+requires (...)~ at the beginning of a file. It is assumed that no such feature is normally present. In order to recognize if no dependencies have been specified, the system will search for the string "#+requires" (case-insensitive) at the beginning of the file before attempting to extract dependencies.
+
+Example:
+
+#+begin_src lisp :results silent
+,#+requires (:alexandria
+            :cl-ppcre
+            :my-app/some/module
+            "package"
+            "util/logging"
+            "util/strings")
+
+(in-package :my-app)
 ...
 #+end_src
