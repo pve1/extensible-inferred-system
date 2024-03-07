@@ -10,6 +10,7 @@
 
 (load-system "extensible-inferred-system-feature-test/basic")
 (load-system "extensible-inferred-system-feature-test/basic/basic-full")
+(load-system "extensible-inferred-system-feature-test/basic/basic-no-dep")
 (load-system "extensible-inferred-system-feature-test/full")
 
 (terpri)

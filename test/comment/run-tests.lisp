@@ -10,6 +10,7 @@
 
 (load-system "extensible-inferred-system-comment-test/basic")
 (load-system "extensible-inferred-system-comment-test/basic/basic-full")
+(load-system "extensible-inferred-system-comment-test/basic/basic-no-dep")
 (load-system "extensible-inferred-system-comment-test/full")
 
 (terpri)
