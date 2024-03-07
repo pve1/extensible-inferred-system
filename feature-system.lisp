@@ -17,11 +17,7 @@
 (defmethod read-dependencies :around ((system feature-system) file)
   (let* ((*features* (cons :requires *features*))
          (first-line (uiop:with-input-file (stream file)
-                       (loop :for c = (read-char stream nil nil)
-                             :while c
-                             :do (unless (member c '(#\space #\newline #\tab))
-                                   (unread-char c stream)
-                                   (loop-finish)))
+                       (peek-char t stream nil)
                        (read-line stream nil "")))
          (requires "#+requires")
          (mismatch (mismatch requires
