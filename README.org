@@ -101,6 +101,15 @@ Example:
 ...
 #+end_src
 
+In order to use this system class, create an asd file like this in your source directory:
+
+#+begin_src lisp :results silent
+(asdf:defsystem #:my-app
+  :defsystem-depends-on ("extensible-inferred-system")
+  :class "extensible-inferred-system:comment-system")
+#+end_src
+
+
 ** Quote-system
 
 This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with a ~quote~ form at the beginning of a file.
@@ -117,6 +126,14 @@ Example:
 
 (in-package :my-app)
 ...
+#+end_src
+
+In order to use this system class, create an asd file like this in your source directory:
+
+#+begin_src lisp :results silent
+(asdf:defsystem #:my-app
+  :defsystem-depends-on ("extensible-inferred-system")
+  :class "extensible-inferred-system:quote-system")
 #+end_src
 
 ** Feature-system
@@ -136,3 +153,12 @@ Example:
 (in-package :my-app)
 ...
 #+end_src
+
+In order to use this system class, create an asd file like this in your source directory:
+
+#+begin_src lisp :results silent
+(asdf:defsystem #:my-app
+  :defsystem-depends-on ("extensible-inferred-system")
+  :class "extensible-inferred-system:feature-system")
+#+end_src
+
