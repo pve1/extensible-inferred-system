@@ -87,7 +87,7 @@ Example:
 ;;;;   alexandria
 ;;;;   cl-ppcre
 ;;;;   my-app/some/module
-;;;;   "macros"
+;;;;   "package"
 ;;;;   "util/logging"
 ;;;;   "util/strings"
 
@@ -105,7 +105,7 @@ Example:
 (quote (:alexandria
         :cl-ppcre
         :my-app/some/module
-        "macros"
+        "package"
         "util/logging"
         "util/strings"))
 
@@ -123,7 +123,7 @@ Example:
 ,#+requires (:alexandria
             :cl-ppcre
             :my-app/some/module
-            "macros"
+            "package"
             "util/logging"
             "util/strings")
 
