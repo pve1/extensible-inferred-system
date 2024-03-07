@@ -138,6 +138,7 @@
     ;; SUB-SYSTEM-NAME: "foo/util"
     ;; SUB-SYSTEM-RELATIVE-DIRECTORY: "foo/"
     ;; SUB-SYSTEM-FILE: "/full/path/to/some-library/foo/util.lisp"
+    ;; SUB-SYSTEM-DIRECTORY-FULL-PATH: "/full/path/to/some-library/foo/util/"
     ;; FILE-TYPE: "lisp"
 
     ;; Heuristic to determine sub-system-file.
