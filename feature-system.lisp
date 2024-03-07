@@ -1,8 +1,8 @@
 (in-package :extensible-inferred-system)
 
 ;;;; A system similar to requires-system, except dependencies are
-;;;; specified using the feature expression #+requires (...)  at the
-;;;; beginning of a file.
+;;;; specified using the reader conditional expression #+requires
+;;;; (...) at the beginning of a file.
 ;;;;
 ;;;; Example:
 ;;;;
