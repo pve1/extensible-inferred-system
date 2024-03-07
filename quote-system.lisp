@@ -1,5 +1,15 @@
 (in-package :extensible-inferred-system)
 
+;;;; A system similar to requires-system, except dependencies are
+;;;; specified with a QUOTE form at the beginning of a file.
+;;;;
+;;;; Example:
+;;;;
+;;;; (quote (:alexandria
+;;;;         :cl-ppcre
+;;;;         "macros"
+;;;;         "util"))
+
 (defclass quote-system (requires-system)
   ())
 
