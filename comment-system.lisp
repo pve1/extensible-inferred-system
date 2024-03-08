@@ -22,15 +22,15 @@
   ((skip-initial-blank-lines :initarg :skip-initial-blank-lines
                              :accessor skip-initial-blank-lines
                              :initform nil)
-   (requires-symbol-name :initarg :requires-symbol-name
-                         :accessor requires-symbol-name
-                         :initform "REQUIRES")))
+   (initial-symbol-name :initarg :initial-symbol-name
+                        :accessor initial-symbol-name
+                        :initform "REQUIRES")))
 
 (defgeneric requires-symbol (system))
 
 (defmethod requires-symbol ((system comment-system))
-  (intern (requires-symbol-name system)
-          :extensible-inferred-system-temporary))
+  (let ((*package* (find-package :extensible-inferred-system-temporary)))
+    (read-from-string (initial-symbol-name system))))
 
 (defmethod extract-dependencies ((primary-system comment-system)
                                  dependency-form
@@ -60,12 +60,12 @@
                            :do (when scanning-for-comment
                                  (cond ((equal "" line)
                                         nil)
-                                       ((search (requires-symbol-name
+                                       ((search (initial-symbol-name
                                                  primary-system)
                                                 line
                                                 :test #'char-equal)
-                                       ;; Found something interesting.
-                                       (setf scanning-for-comment nil))
+                                        ;; Found something interesting.
+                                        (setf scanning-for-comment nil))
                                        ;; Found something uninteresting.
                                        (t (loop-finish))))
                                (unless scanning-for-comment

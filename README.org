@@ -83,7 +83,7 @@ Then the contents of each file could look like this:
 
 ** Comment-system
 
-This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is ~requires dep1 dep2 ...~ and it may be a single line, or it may span multiple lines. A non-comment line ends the dependency specification.
+This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is ~requires dep1 dep2 ...~ and it may be a single line, or it may span multiple lines. A non-comment line ends the dependency specification. A different initial symbol (instead of ~requires~) may be specified with the initarg ~:initial-symbol-name~. It should be a string, and will be ~read-from-string~ into a temporary package.
 
 Example:
 
@@ -106,7 +106,8 @@ In order to use this system class, create an asd file like this in your source d
 #+begin_src lisp :results silent
 (asdf:defsystem #:my-app
   :defsystem-depends-on ("extensible-inferred-system")
-  :class "extensible-inferred-system:comment-system")
+  :class "extensible-inferred-system:comment-system"
+  :initial-symbol-name "dependencies") ; Optional
 #+end_src
 
 
