@@ -1,12 +1,4 @@
-(require :asdf)
-(require :extensible-inferred-system)
-
-(in-package :cl-user)
-
-#+sbcl (sb-ext:disable-debugger)
-
-(defun load-system (system)
-  (asdf:load-system system))
+(load (merge-pathnames "../setup.lisp" *load-truename*))
 
 (load-system "extensible-inferred-system-quote-test/basic")
 (load-system "extensible-inferred-system-quote-test/basic/basic-full")
