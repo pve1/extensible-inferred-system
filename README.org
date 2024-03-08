@@ -107,7 +107,7 @@ In order to use this system class, create an asd file like this in your source d
 (asdf:defsystem #:my-app
   :defsystem-depends-on ("extensible-inferred-system")
   :class "extensible-inferred-system:comment-system"
-  :initial-symbol-name "dependencies") ; Optional
+  :initial-symbol-name "dependencies") ; Optional, default is "requires".
 #+end_src
 
 

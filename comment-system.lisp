@@ -26,9 +26,9 @@
                         :accessor initial-symbol-name
                         :initform "REQUIRES")))
 
-(defgeneric requires-symbol (system))
+(defgeneric initial-symbol (system))
 
-(defmethod requires-symbol ((system comment-system))
+(defmethod initial-symbol ((system comment-system))
   (let ((*package* (find-package :extensible-inferred-system-temporary)))
     (read-from-string (initial-symbol-name system))))
 
@@ -42,37 +42,20 @@
   (and (listp form)
        (setf car (car form))
        (symbolp car)
-       (eq (requires-symbol primary-system) car)))
+       (eq car (initial-symbol primary-system))))
 
 (defmethod read-dependencies ((primary-system comment-system) file)
   (let* ((string (with-output-to-string (s)
                    (princ #\( s)
                    (uiop:with-input-file (stream file)
-                     (loop :with scanning-for-comment =
-                              (skip-initial-blank-lines primary-system)
-                           :for line = (read-line stream nil stream)
-                           :while (or (and scanning-for-comment
-                                           (zerop (length line)))
-                                      (and (not (zerop (length line)))
-                                           (eql #\; (aref line 0))))
-                           ;; Skip initial empty lines if the system
-                           ;; allows.
-                           :do (when scanning-for-comment
-                                 (cond ((equal "" line)
-                                        nil)
-                                       ((search (initial-symbol-name
-                                                 primary-system)
-                                                line
-                                                :test #'char-equal)
-                                        ;; Found something interesting.
-                                        (setf scanning-for-comment nil))
-                                       ;; Found something uninteresting.
-                                       (t (loop-finish))))
-                               (unless scanning-for-comment
-                                 (map nil (lambda (x)
-                                            (unless (eql x #\;)
-                                              (princ x s)))
-                                      line))))
+                     (peek-char t stream nil)
+                     (loop :for line = (read-line stream nil "")
+                           :while (and (not (zerop (length line)))
+                                       (eql #\; (aref line 0)))
+                           :do (map nil (lambda (x)
+                                          (unless (eql x #\;)
+                                            (princ x s)))
+                                    line)))
                    (princ #\) s)))
          (dependency-form
            (let ((*package* (find-package :extensible-inferred-system-temporary))
