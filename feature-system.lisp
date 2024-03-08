@@ -12,20 +12,27 @@
 ;;;;             "util"))
 
 (defclass feature-system (requires-system)
-  ())
+  ((feature-expression
+    :initarg :feature-expression
+    :accessor feature-expression
+    :initform "REQUIRES")))
+
+(defmethod feature-expression-symbol ((f feature-system))
+  (let ((*package* (find-package :keyword)))
+    (read-from-string (feature-expression f))))
 
 (defmethod read-dependencies :around ((system feature-system) file)
-  (let* ((*features* (cons :requires *features*))
-         (first-line (uiop:with-input-file (stream file)
-                       (peek-char t stream nil)
-                       (read-line stream nil "")))
-         (requires "#+requires")
-         (mismatch (mismatch requires
-                             first-line
-                             :test #'char-equal)))
-    (when (or (null mismatch)
-              (= (length requires)
-                 mismatch))
+  (let* ((*features* (cons (feature-expression-symbol system) ; :requires
+                           *features*))
+         (correct-reader-conditional-found
+           (uiop:with-input-file (stream file)
+             (peek-char t stream nil)
+             (and (eql #\# (read-char stream nil nil))
+                  (eql #\+ (read-char stream nil nil))
+                  (eq (let ((*package* (find-package :keyword)))
+                        (read stream nil stream))
+                      (feature-expression-symbol system))))))
+    (when correct-reader-conditional-found
       (call-next-method))))
 
 (defmethod extract-dependencies ((primary-system feature-system)

@@ -138,7 +138,7 @@ In order to use this system class, create an asd file like this in your source d
 
 ** Feature-system
 
-This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with the reader conditional expression ~#+requires (...)~ at the beginning of a file. It is assumed that no such feature is normally present. In order to recognize if no dependencies have been specified, the system will search for the string "#+requires" (case-insensitive) at the beginning of the file before attempting to extract dependencies.
+This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with the reader conditional expression ~#+requires (...)~ at the beginning of a file. It is assumed that no such feature is normally present. In order to recognize whether no dependencies have been specified, the system will look for the reader conditional "#+requires" at the beginning of the file before attempting to extract dependencies. A different feature expression may be specified with the initarg ~:feature-expression~. The argument should be a string, and will be ~read-from-string~ with ~*package*~ bound to the keyword package (so ~"FOO"~ becomes ~:FOO~).
 
 Example:
 
@@ -159,6 +159,7 @@ In order to use this system class, create an asd file like this in your source d
 #+begin_src lisp :results silent
 (asdf:defsystem #:my-app
   :defsystem-depends-on ("extensible-inferred-system")
-  :class "extensible-inferred-system:feature-system")
+  :class "extensible-inferred-system:feature-system"
+  :feature-expression "dependencies") ; optional
 #+end_src
 
