@@ -38,15 +38,12 @@
   (declare (ignore pathname))
   (rest dependency-form))
 
-(defmethod dependency-form-p ((primary-system comment-system) form &aux car)
-  (and (listp form)
-       (setf car (car form))
-       (symbolp car)
-       (eq car (initial-symbol primary-system))))
+(defmethod dependency-form-p ((primary-system comment-system) form)
+  t) ; Already checked by read-dependencies.
 
 (defmethod read-dependencies ((primary-system comment-system) file)
   (let* ((string (with-output-to-string (s)
-                   (princ #\( s)
+                   ;; Collect the initial comment, skipping ";".
                    (uiop:with-input-file (stream file)
                      (peek-char t stream nil)
                      (loop :for line = (read-line stream nil "")
@@ -55,12 +52,21 @@
                            :do (map nil (lambda (x)
                                           (unless (eql x #\;)
                                             (princ x s)))
-                                    line)))
-                   (princ #\) s)))
+                                    line)))))
          (dependency-form
-           (let ((*package* (find-package :extensible-inferred-system-temporary))
-                 (*read-eval* nil))
-             (read-from-string string))))
+           (with-input-from-string (stream string)
+             (let ((*package* (find-package :extensible-inferred-system-temporary))
+                   (*read-eval* nil)
+                   initial-symbol
+                   rest)
+               ;; Check the initial symbol first and only read the
+               ;; rest if it's ok.
+               (setf initial-symbol (read stream nil stream))
+               (when (eq initial-symbol (initial-symbol primary-system))
+                 (setf rest (loop :for object = (read stream nil stream)
+                                  :until (eq object stream)
+                                  :collect object))
+                 (cons initial-symbol rest))))))
     (when (dependency-form-p primary-system dependency-form)
       (prog1 (extract-dependencies primary-system dependency-form)
         (do-symbols (sym :extensible-inferred-system-temporary)
