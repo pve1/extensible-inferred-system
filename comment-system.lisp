@@ -24,7 +24,10 @@
                              :initform nil)
    (initial-symbol-name :initarg :initial-symbol-name
                         :accessor initial-symbol-name
-                        :initform "REQUIRES")))
+                        :initform "REQUIRES")
+   (ignore-lines :initarg :ignore-lines
+                 :accessor ignore-lines
+                 :initform nil)))
 
 (defgeneric initial-symbol (system))
 
@@ -41,6 +44,17 @@
 (defmethod dependency-form-p ((primary-system comment-system) form)
   t) ; Already checked by read-dependencies.
 
+(defgeneric ignore-line-p (system line)
+  (:method (system line)
+    nil)
+  (:method ((system comment-system) line)
+    (let ((ignore-lines (ignore-lines system)))
+      (when (stringp ignore-lines)
+        (setf ignore-lines (list ignore-lines)))
+      (some (lambda (ignore)
+              (search ignore line))
+            ignore-lines))))
+
 (defmethod read-dependencies ((primary-system comment-system) file)
   (let* ((string (with-output-to-string (s)
                    ;; Collect the initial comment, skipping ";".
@@ -49,6 +63,8 @@
                      (loop :for line = (read-line stream nil "")
                            :while (and (not (zerop (length line)))
                                        (eql #\; (aref line 0)))
+                           :unless (ignore-line-p primary-system
+                                                  line)
                            :do (map nil (lambda (x)
                                           (unless (eql x #\;)
                                             (princ x s)))

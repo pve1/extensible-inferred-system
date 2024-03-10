@@ -13,5 +13,10 @@
 (asdf:clear-system "extensible-inferred-system-comment-test/basic/basic-dep")
 (load-system "extensible-inferred-system-comment-test/initial-symbol")
 
+(let ((system (asdf:find-system "extensible-inferred-system-comment-test")))
+  (setf (extensible-inferred-system::ignore-lines system)
+        "-*-")
+  (load-system "extensible-inferred-system-comment-test/ignore-lines"))
+
 (terpri)
 (uiop:quit)

@@ -85,7 +85,7 @@ Then the contents of each file could look like this:
 
 ** Comment-system
 
-This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is ~requires dep1 dep2 ...~ and it may be a single line, or it may span multiple lines. A non-comment line ends the dependency specification. A different initial symbol (instead of ~requires~) may be specified with the initarg ~:initial-symbol-name~. It should be a string, and will be ~read-from-string~ into a temporary package.
+This system is a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified in a comment at the beginning of a file. The format of the comment is ~requires dep1 dep2 ...~ and it may be a single line, or it may span multiple lines. A non-comment line ends the dependency specification. A different initial symbol (instead of ~requires~) may be specified with the initarg ~:initial-symbol-name~. It should be a string, and will be ~read-from-string~ into a temporary package. Lines containing certain strings can be ignored with the ~:ignore-lines~ initarg. The argument should be a string or a list of strings. Its main use is to skip lines with Emacs file local variables (~-*-~).
 
 Example:
 
@@ -109,6 +109,7 @@ In order to use this system class, create an asd file like this in your source d
 (asdf:defsystem #:my-app
   :defsystem-depends-on ("extensible-inferred-system")
   :class "extensible-inferred-system:comment-system"
+  :ignore-lines "-*-" ; Optional
   :initial-symbol-name "dependencies") ; Optional, default is "requires".
 #+end_src
 
