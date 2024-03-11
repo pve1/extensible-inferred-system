@@ -15,17 +15,27 @@
   ((feature-expression
     :initarg :feature-expression
     :accessor feature-expression
-    :initform "REQUIRES")))
+    :initform "REQUIRES")
+   (skip-comments :initarg :skip-comments
+                  :accessor feature-system-skip-comments-p
+                  :initform t)))
 
 (defmethod feature-expression-symbol ((f feature-system))
   (let ((*package* (find-package :keyword)))
     (read-from-string (feature-expression f))))
+
+(defgeneric feature-system-skip-comments (system stream)
+  (:method ((system feature-system) stream)
+    (loop :while (eql (peek-char t stream nil) #\;)
+          :do (read-line stream nil))))
 
 (defmethod read-dependencies :around ((system feature-system) file)
   (let* ((*features* (cons (feature-expression-symbol system) ; :requires
                            *features*))
          (correct-reader-conditional-found
            (uiop:with-input-file (stream file)
+             (when (feature-system-skip-comments-p system)
+               (feature-system-skip-comments system stream))
              (peek-char t stream nil)
              (and (eql #\# (read-char stream nil nil))
                   (eql #\+ (read-char stream nil nil))
