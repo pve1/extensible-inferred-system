@@ -5,6 +5,7 @@
 (load-system "extensible-inferred-system-feature-test/basic/basic-no-dep")
 (load-system "extensible-inferred-system-feature-test/full")
 
+;; Skip comments
 
 (load-system "extensible-inferred-system-feature-test/skip-comments")
 (setf (extensible-inferred-system::feature-system-skip-comments-p
@@ -16,6 +17,8 @@
 (setf (extensible-inferred-system::feature-system-skip-comments-p
        (asdf:find-system :extensible-inferred-system-feature-test))
       t)
+
+;; Different feature expression
 
 (setf (extensible-inferred-system::feature-expression
        (asdf:find-system :extensible-inferred-system-feature-test))
