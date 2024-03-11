@@ -144,6 +144,8 @@ In order to use this system class, create an asd file like this in your source d
 
 This system is also a subclass of ~requires-system~ and behaves in a similar way, except that dependencies are specified with the reader conditional expression ~#+requires (...)~ at the beginning of a file. It is assumed that no such feature is normally present. In order to recognize whether no dependencies have been specified, the system will look for the reader conditional "#+requires" at the beginning of the file before attempting to extract dependencies. A different feature expression may be specified with the initarg ~:feature-expression~. The argument should be a string, and will be ~read-from-string~ with ~*package*~ bound to the keyword package (so ~"FOO"~ becomes ~:FOO~).
 
+Initial comment lines will be skipped by default. If comments should not be skipped, the initarg ~:skip-comments nil~ can be used.
+
 Example:
 
 #+begin_src lisp :results silent
