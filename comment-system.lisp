@@ -77,12 +77,16 @@
                    rest)
                ;; Check the initial symbol first and only read the
                ;; rest if it's ok.
-               (setf initial-symbol (read stream nil stream))
-               (when (eq initial-symbol (initial-symbol primary-system))
-                 (setf rest (loop :for object = (read stream nil stream)
-                                  :until (eq object stream)
-                                  :collect object))
-                 (cons initial-symbol rest))))))
+               (handler-bind ((error (lambda (c)
+                                       (error "Could not read dependency form in file ~S (~A)."
+                                              file
+                                              c))))
+                 (setf initial-symbol (read stream nil stream))
+                 (when (eq initial-symbol (initial-symbol primary-system))
+                   (setf rest (loop :for object = (read stream nil stream)
+                                    :until (eq object stream)
+                                    :collect object))
+                   (cons initial-symbol rest)))))))
     (when (dependency-form-p primary-system dependency-form)
       (prog1 (extract-dependencies primary-system dependency-form)
         (do-symbols (sym :extensible-inferred-system-temporary)
